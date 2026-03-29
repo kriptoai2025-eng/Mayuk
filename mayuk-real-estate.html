@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mayuk Real Estate | Premium Properties</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        mayuk: {
+                            red: '#D32F2F',
+                            dark: '#B71C1C',
+                            light: '#FFEBEE',
+                            white: '#FFFFFF'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .glass-nav { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .property-card:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
+        .transition-all { transition-duration: 300ms; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        // --- Mock Data ---
+        const initialProperties = [
+            {
+                id: 1,
+                title: "Modern Villa with Pool",
+                price: "$1,250,000",
+                location: "Beverly Hills, CA",
+                beds: 4,
+                baths: 3,
+                sqft: 3200,
+                image: "https://images.unsplash.com/photo-1613977257363-707ba9348227?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                tag: "Featured"
+            },
+            {
+                id: 2,
+                title: "Luxury Downtown Penthouse",
+                price: "$850,000",
+                location: "New York, NY",
+                beds: 2,
+                baths: 2,
+                sqft: 1500,
+                image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                tag: "New"
+            },
+            {
+                id: 3,
+                title: "Cozy Family Home",
+                price: "$450,000",
+                location: "Austin, TX",
+                beds: 3,
+                baths: 2,
+                sqft: 2100,
+                image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                tag: "Sale"
+            },
+            {
+                id: 4,
+                title: "Seaside Retreat",
+                price: "$2,100,000",
+                location: "Miami, FL",
+                beds: 5,
+                baths: 4,
+                sqft: 4500,
+                image: "https://images.unsplash.com/photo-1600596542815-e32c8ec049db?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                tag: "Premium"
+            }
+        ];
+
+        // --- Components ---
+
+        const Icon = ({ name, size = 20, className }) => {
+            useEffect(() => {
+                lucide.createIcons();
+            }, [name]);
+            return <i data-lucide={name} width={size} height={size} className={className}></i>;
+        };
+
+        const Navbar = ({ setView, view }) => (
+            <nav className="glass-nav fixed w-full z-50 border-b border-gray-100">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex justify-between h-20 items-center">
+                        <div className="flex items-center cursor-pointer" onClick={() => setView('home')}>
+                            <div className="bg-mayuk-red text-white p-2 rounded-lg mr-2">
+                                <Icon name="home" size={24} />
+                            </div>
+                            <span className="text-2xl font-bold text-gray-900 tracking-tight">Mayuk<span className="text-mayuk-red">.</span></span>
+                        </div>
+                        <div className="hidden md:flex space-x-8">
+                            <button onClick={() => setView('home')} className={`text-sm font-medium ${view === 'home' ? 'text-mayuk-red' : 'text-gray-500 hover:text-gray-900'}`}>Buy</button>
+                            <button className="text-sm font-medium text-gray-500 hover:text-gray-900">Rent</button>
+                            <button className="text-sm font-medium text-gray-500 hover:text-gray-900">Sell</button>
+                            <button className="text-sm font-medium text-gray-500 hover:text-gray-900">Agents</button>
+                        </div>
+                        <div className="flex items-center space-x-4">
+                            <button 
+                                onClick={() => setView(view === 'admin' ? 'home' : 'admin')}
+                                className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${view === 'admin' ? 'bg-gray-100 text-gray-800' : 'bg-mayuk-red text-white hover:bg-mayuk-dark shadow-lg shadow-red-200'}`}
+                            >
+                                {view === 'admin' ? 'Exit Admin' : 'Admin Panel'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        );
+
+        const Hero = () => (
+            <div className="relative bg-gray-900 pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
+                <div className="absolute inset-0">
+                    <img className="w-full h-full object-cover opacity-40" src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80" alt="Hero Background" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent"></div>
+                </div>
+                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                    <h1 className="text-4xl md:text-6xl font-extrabold text-white tracking-tight mb-6">
+                        Find Your Dream Home <br/> with <span className="text-mayuk-red">Mayuk</span>
+                    </h1>
+                    <p className="mt-4 max-w-2xl mx-auto text-xl text-gray-300 mb-10">
+                        Discover a curated selection of the finest properties. Luxury living made simple.
+                    </p>
+                    <div className="max-w-3xl mx-auto bg-white p-2 rounded-full shadow-2xl flex flex-col md:flex-row">
+                        <input type="text" placeholder="Search by city, neighborhood, or address..." className="flex-grow px-6 py-4 rounded-full outline-none text-gray-700" />
+                        <button className="bg-mayuk-red text-white px-8 py-4 rounded-full font-bold hover:bg-mayuk-dark transition-colors mt-2 md:mt-0">
+                            Search
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const PropertyCard = ({ property }) => (
+            <div className="property-card bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 transition-all duration-300 group">
+                <div className="relative h-64 overflow-hidden">
+                    <img src={property.image} alt={property.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                    <div className="absolute top-4 left-4 bg-mayuk-red text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
+                        {property.tag}
+                    </div>
+                    <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur text-gray-900 font-bold px-4 py-2 rounded-lg shadow-lg">
+                        {property.price}
+                    </div>
+                </div>
+                <div className="p-6">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2 truncate">{property.title}</h3>
+                    <div className="flex items-center text-gray-500 mb-4">
+                        <Icon name="map-pin" size={16} className="mr-1 text-mayuk-red" />
+                        <span className="text-sm">{property.location}</span>
+                    </div>
+                    <div className="flex justify-between items-center border-t border-gray-100 pt-4">
+                        <div className="flex items-center text-gray-600 text-sm">
+                            <Icon name="bed" size={18} className="mr-2 text-gray-400" />
+                            <span>{property.beds} Beds</span>
+                        </div>
+                        <div className="flex items-center text-gray-600 text-sm">
+                            <Icon name="bath" size={18} className="mr-2 text-gray-400" />
+                            <span>{property.baths} Baths</span>
+                        </div>
+                        <div className="flex items-center text-gray-600 text-sm">
+                            <Icon name="square" size={18} className="mr-2 text-gray-400" />
+                            <span>{property.sqft} sqft</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const AdminPanel = ({ properties, setProperties }) => {
+            const [formData, setFormData] = useState({ title: '', price: '', location: '', beds: '', baths: '', sqft: '', image: '' });
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                const newProperty = {
+                    id: Date.now(),
+                    ...formData,
+                    tag: "New",
+                    beds: Number(formData.beds),
+                    baths: Number(formData.baths),
+                    sqft: Number(formData.sqft)
+                };
+                setProperties([newProperty, ...properties]);
+                setFormData({ title: '', price: '', location: '', beds: '', baths: '', sqft: '', image: '' });
+                alert("Property added successfully!");
+            };
+
+            const handleDelete = (id) => {
+                if(confirm("Are you sure you want to delete this property?")) {
+                    setProperties(properties.filter(p => p.id !== id));
+                }
+            };
+
+            return (
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                    <div className="mb-8">
+                        <h2 className="text-3xl font-bold text-gray-900">Admin Dashboard</h2>
+                        <p className="text-gray-500 mt-2">Manage your property listings here.</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        {/* Add Property Form */}
+                        <div className="lg:col-span-1">
+                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 sticky top-24">
+                                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                                    <Icon name="plus-circle" className="mr-2 text-mayuk-red" /> Add New Property
+                                </h3>
+                                <form onSubmit={handleSubmit} className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                                        <input required type="text" className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-mayuk-red focus:border-transparent outline-none" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Price</label>
+                                        <input required type="text" className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-mayuk-red focus:border-transparent outline-none" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                                        <input required type="text" className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-mayuk-red focus:border-transparent outline-none" value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} />
+                                    </div>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700 mb-1">Beds</label>
+                                            <input required type="number" className="w-full px-2 py-2 border border-gray-200 rounded-lg outline-none" value={formData.beds} onChange={e => setFormData({...formData, beds: e.target.value})} />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700 mb-1">Baths</label>
+                                            <input required type="number" className="w-full px-2 py-2 border border-gray-200 rounded-lg outline-none" value={formData.baths} onChange={e => setFormData({...formData, baths: e.target.value})} />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700 mb-1">SqFt</label>
+                                            <input required type="number" className="w-full px-2 py-2 border border-gray-200 rounded-lg outline-none" value={formData.sqft} onChange={e => setFormData({...formData, sqft: e.target.value})} />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+                                        <input required type="url" placeholder="https://..." className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-mayuk-red focus:border-transparent outline-none" value={formData.image} onChange={e => setFormData({...formData, image: e.target.value})} />
+                                    </div>
+                                    <button type="submit" className="w-full bg-mayuk-red text-white py-3 rounded-lg font-bold hover:bg-mayuk-dark transition-colors">
+                                        Add Property
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        {/* List Management */}
+                        <div className="lg:col-span-2 space-y-4">
+                            <h3 className="text-xl font-bold text-gray-900 mb-4">Current Listings ({properties.length})</h3>
+                            {properties.map(property => (
+                                <div key={property.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col sm:flex-row gap-4 items-center">
+                                    <img src={property.image} alt={property.title} className="w-full sm:w-32 h-32 object-cover rounded-lg" />
+                                    <div className="flex-grow">
+                                        <h4 className="font-bold text-gray-900">{property.title}</h4>
+                                        <p className="text-mayuk-red font-semibold">{property.price}</p>
+                                        <p className="text-sm text-gray-500">{property.location}</p>
+                                    </div>
+                                    <button onClick={() => handleDelete(property.id)} className="text-red-500 hover:bg-red-50 p-2 rounded-full transition-colors">
+                                        <Icon name="trash-2" size={20} />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const Footer = () => (
+            <footer className="bg-gray-900 text-white pt-16 pb-8">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+                        <div className="col-span-1 md:col-span-1">
+                            <div className="flex items-center mb-4">
+                                <div className="bg-mayuk-red text-white p-1.5 rounded mr-2">
+                                    <Icon name="home" size={20} />
+                                </div>
+                                <span className="text-xl font-bold">Mayuk.</span>
+                            </div>
+                            <p className="text-gray-400 text-sm leading-relaxed">
+                                Mayuk Real Estate provides the most luxurious properties for discerning clients worldwide.
+                            </p>
+                        </div>
+                        <div>
+                            <h4 className="font-bold mb-4">Company</h4>
+                            <ul className="space-y-2 text-gray-400 text-sm">
+                                <li><a href="#" className="hover:text-white">About Us</a></li>
+                                <li><a href="#" className="hover:text-white">Careers</a></li>
+                                <li><a href="#" className="hover:text-white">Press</a></li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 className="font-bold mb-4">Resources</h4>
+                            <ul className="space-y-2 text-gray-400 text-sm">
+                                <li><a href="#" className="hover:text-white">Blog</a></li>
+                                <li><a href="#" className="hover:text-white">Guides</a></li>
+                                <li><a href="#" className="hover:text-white">FAQ</a></li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 className="font-bold mb-4">Contact</h4>
+                            <ul className="space-y-2 text-gray-400 text-sm">
+                                <li>support@mayuk.com</li>
+                                <li>+1 (555) 123-4567</li>
+                                <li>123 Luxury Lane, Beverly Hills</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div className="border-t border-gray-800 pt-8 text-center text-gray-500 text-sm">
+                        &copy; {new Date().getFullYear()} Mayuk Real Estate. All rights reserved.
+                    </div>
+                </div>
+            </footer>
+        );
+
+        const App = () => {
+            const [view, setView] = useState('home');
+            const [properties, setProperties] = useState(initialProperties);
+
+            useEffect(() => {
+                lucide.createIcons();
+            });
+
+            return (
+                <div className="min-h-screen flex flex-col">
+                    <Navbar setView={setView} view={view} />
+                    
+                    <main className="flex-grow">
+                        {view === 'home' ? (
+                            <>
+                                <Hero />
+                                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+                                    <div className="flex justify-between items-end mb-8">
+                                        <div>
+                                            <h2 className="text-3xl font-bold text-gray-900">Latest Properties</h2>
+                                            <p className="text-gray-500 mt-2">Handpicked selection of premium estates</p>
+                                        </div>
+                                        <button className="text-mayuk-red font-semibold hover:text-mayuk-dark flex items-center">
+                                            View All <Icon name="arrow-right" size={16} className="ml-1" />
+                                        </button>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                                        {properties.map(property => (
+                                            <PropertyCard key={property.id} property={property} />
+                                        ))}
+                                    </div>
+                                </div>
+                                
+                                {/* Features Section */}
+                                <div className="bg-mayuk-light py-16">
+                                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                                            <div className="p-6">
+                                                <div className="bg-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-md text-mayuk-red">
+                                                    <Icon name="shield-check" size={32} />
+                                                </div>
+                                                <h3 className="text-xl font-bold text-gray-900 mb-2">Trusted by Thousands</h3>
+                                                <p className="text-gray-600">Verified listings and secure transactions for peace of mind.</p>
+                                            </div>
+                                            <div className="p-6">
+                                                <div className="bg-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-md text-mayuk-red">
+                                                    <Icon name="users" size={32} />
+                                                </div>
+                                                <h3 className="text-xl font-bold text-gray-900 mb-2">Expert Agents</h3>
+                                                <p className="text-gray-600">Our team of professionals guides you every step of the way.</p>
+                                            </div>
+                                            <div className="p-6">
+                                                <div className="bg-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-md text-mayuk-red">
+                                                    <Icon name="key" size={32} />
+                                                </div>
+                                                <h3 className="text-xl font-bold text-gray-900 mb-2">Easy Process</h3>
+                                                <p className="text-gray-600">From viewing to keys, we make buying simple and fast.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </>
+                        ) : (
+                            <AdminPanel properties={properties} setProperties={setProperties} />
+                        )}
+                    </main>
+
+                    <Footer />
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
