@@ -1,0 +1,230 @@
+{% extends 'base/dashboard_base.html' %}
+
+{% block dashboard_content %}
+<!-- Welcome Banner -->
+<div class="stat-card mb-4">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <div class="d-flex align-items-center gap-3">
+                {% if student.profile_picture %}
+                    <img src="{{ student.profile_picture.url }}" alt="" class="rounded-circle" width="80" height="80">
+                {% else %}
+                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; font-size: 2rem;">
+                        {{ student.user.first_name|default:student.user.username|first|upper }}
+                    </div>
+                {% endif %}
+                <div>
+                    <h4 class="mb-1">Welcome back, {{ student.user.get_full_name|default:student.user.username }}!</h4>
+                    <p class="text-muted mb-0">
+                        <i class="bi bi-book me-1"></i>{{ student.class_enrolled.name }}{% if student.class_enrolled.section %} - {{ student.class_enrolled.section }}{% endif %}
+                        <span class="mx-2">|</span>
+                        <i class="bi bi-building me-1"></i>{{ school.name }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if unread_announcements > 0 %}
+                <span class="badge bg-danger fs-6">
+                    <i class="bi bi-bell me-1"></i>{{ unread_announcements }} New Announcements
+                </span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-card-icon primary">
+                <i class="bi bi-megaphone"></i>
+            </div>
+            <div class="stat-card-value">{{ unread_announcements }}</div>
+            <div class="stat-card-label">Unread Announcements</div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-card-icon warning">
+                <i class="bi bi-clock-history"></i>
+            </div>
+            <div class="stat-card-value">{{ pending_assignments }}</div>
+            <div class="stat-card-label">Pending Assignments</div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-card-icon success">
+                <i class="bi bi-file-earmark-check"></i>
+            </div>
+            <div class="stat-card-value">{{ my_submissions.count }}</div>
+            <div class="stat-card-label">Submitted Work</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Recent Announcements -->
+    <div class="col-lg-8">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="mb-0"><i class="bi bi-megaphone me-2"></i>School Announcements</h5>
+                <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            
+            {% for announcement in recent_announcements %}
+            <div class="card mb-3 border-0 shadow-sm {% if announcement.is_pinned %}border-warning border-2{% endif %}">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            {% if announcement.is_pinned %}
+                                <span class="badge bg-warning text-dark me-2"><i class="bi bi-pin-angle-fill me-1"></i>Pinned</span>
+                            {% endif %}
+                            <span class="badge bg-{% if announcement.category == 'Exam' %}danger{% elif announcement.category == 'Resumption' %}success{% elif announcement.category == 'Closing' %}info{% else %}secondary{% endif %}">
+                                {{ announcement.category }}
+                            </span>
+                            <span class="badge bg-{% if announcement.priority == 'High' %}danger{% elif announcement.priority == 'Medium' %}warning{% else %}light text-dark{% endif %} ms-1">
+                                {{ announcement.priority }}
+                            </span>
+                        </div>
+                        <small class="text-muted">{{ announcement.publish_date|date:"M d, Y" }}</small>
+                    </div>
+                    <h6 class="card-title">{{ announcement.title }}</h6>
+                    <p class="card-text text-muted">{{ announcement.content|truncatewords:30 }}</p>
+                    {% if announcement.attachment %}
+                        <a href="{{ announcement.attachment.url }}" class="btn btn-sm btn-outline-secondary" download>
+                            <i class="bi bi-download me-1"></i>Download Attachment
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-muted text-center py-4">No announcements at the moment</p>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- My Assignments -->
+    <div class="col-lg-4">
+        <div class="stat-card h-100">
+            <h5 class="mb-4"><i class="bi bi-clipboard-check me-2"></i>My Submissions</h5>
+            <div class="list-group list-group-flush">
+                {% for submission in my_submissions %}
+                <div class="list-group-item px-0">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">{{ submission.assignment.title }}</h6>
+                        {% if submission.is_graded %}
+                            <span class="badge bg-success">{{ submission.score }}/{{ submission.assignment.max_score }}</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Pending</span>
+                        {% endif %}
+                    </div>
+                    <p class="mb-1 small text-muted">{{ submission.assignment.subject.name }}</p>
+                    <small class="text-muted">Submitted: {{ submission.date_submitted|date:"M d" }}</small>
+                    {% if submission.is_graded and submission.feedback %}
+                        <p class="mt-2 small text-primary"><i class="bi bi-chat-left-text me-1"></i>{{ submission.feedback|truncatechars:50 }}</p>
+                    {% endif %}
+                </div>
+                {% empty %}
+                <p class="text-muted text-center py-3">No submissions yet</p>
+                {% endfor %}
+            </div>
+            <div class="mt-3 text-center">
+                <a href="#" class="btn btn-outline-primary btn-sm">View All Assignments</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mt-2">
+    <!-- Study Materials -->
+    <div class="col-lg-6">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="mb-0"><i class="bi bi-book me-2"></i>Study Materials</h5>
+                <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Subject</th>
+                            <th>Downloads</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for note in available_notes %}
+                        <tr>
+                            <td>
+                                <strong>{{ note.title }}</strong>
+                                <br><small class="text-muted">{{ note.description|truncatechars:50 }}</small>
+                            </td>
+                            <td><small>{{ note.subject.name }}</small></td>
+                            <td><small><i class="bi bi-download me-1"></i>{{ note.download_count }}</small></td>
+                            <td>
+                                <a href="{{ note.file.url }}" class="btn btn-sm btn-outline-primary" download>
+                                    <i class="bi bi-download"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">No study materials available</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Latest Grades -->
+    <div class="col-lg-6">
+        <div class="stat-card h-100">
+            <h5 class="mb-4"><i class="bi bi-graph-up me-2"></i>Latest Grades</h5>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Term</th>
+                            <th>CA</th>
+                            <th>Exam</th>
+                            <th>Total</th>
+                            <th>Grade</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for grade in latest_grades %}
+                        <tr>
+                            <td><strong>{{ grade.subject.name }}</strong></td>
+                            <td><small>{{ grade.term }}</small></td>
+                            <td>{{ grade.ca_score }}</td>
+                            <td>{{ grade.exam_score }}</td>
+                            <td><strong>{{ grade.total_score }}</strong></td>
+                            <td>
+                                <span class="badge bg-{% if grade.grade == 'A1' %}success{% elif grade.grade == 'F9' %}danger{% else %}primary{% endif %}">
+                                    {{ grade.grade }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">No grades published yet</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-3 text-center">
+                <a href="#" class="btn btn-outline-primary btn-sm">View Full Results</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

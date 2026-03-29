@@ -1,0 +1,235 @@
+{% extends 'base/dashboard_base.html' %}
+
+{% block dashboard_content %}
+<!-- Stats Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-card-icon primary">
+                <i class="bi bi-building"></i>
+            </div>
+            <div class="stat-card-value">{{ total_schools }}</div>
+            <div class="stat-card-label">Total Schools</div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-card-icon success">
+                <i class="bi bi-check-circle"></i>
+            </div>
+            <div class="stat-card-value">{{ active_schools }}</div>
+            <div class="stat-card-label">Active Schools</div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-card-icon primary">
+                <i class="bi bi-person-badge"></i>
+            </div>
+            <div class="stat-card-value">{{ total_students }}</div>
+            <div class="stat-card-label">Total Students</div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-card-icon warning">
+                <i class="bi bi-chalkboard-teacher"></i>
+            </div>
+            <div class="stat-card-value">{{ total_teachers }}</div>
+            <div class="stat-card-label">Total Teachers</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Monthly Registrations Chart -->
+    <div class="col-lg-8">
+        <div class="stat-card h-100">
+            <h5 class="mb-4"><i class="bi bi-graph-up me-2"></i>School Registrations (Last 6 Months)</h5>
+            <canvas id="registrationsChart" height="100"></canvas>
+        </div>
+    </div>
+    
+    <!-- Schools by State -->
+    <div class="col-lg-4">
+        <div class="stat-card h-100">
+            <h5 class="mb-4"><i class="bi bi-geo-alt me-2"></i>Top States</h5>
+            <div class="list-group list-group-flush">
+                {% for state_data in schools_by_state %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        {{ state_data.state }}
+                        <span class="badge bg-primary rounded-pill">{{ state_data.count }}</span>
+                    </div>
+                {% empty %}
+                    <p class="text-muted text-center py-3">No schools registered yet</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mt-2">
+    <!-- Recent Schools -->
+    <div class="col-lg-6">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Recent Registrations</h5>
+                <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>School Name</th>
+                            <th>State</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for school in recent_schools %}
+                        <tr>
+                            <td>
+                                <strong>{{ school.name }}</strong><br>
+                                <small class="text-muted">{{ school.registration_number }}</small>
+                            </td>
+                            <td>{{ school.state }}</td>
+                            <td>{{ school.date_registered|date:"M d, Y" }}</td>
+                            <td>
+                                {% if school.is_active %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Inactive</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">No recent registrations</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Expiring Subscriptions -->
+    <div class="col-lg-6">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Expiring Soon</h5>
+                <a href="#" class="btn btn-sm btn-outline-warning">View All</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>School</th>
+                            <th>Admin</th>
+                            <th>Expires</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for school in expiring_soon %}
+                        <tr>
+                            <td><strong>{{ school.name }}</strong></td>
+                            <td>{{ school.admin_name }}</td>
+                            <td>
+                                <span class="text-danger">{{ school.subscription_end_date|date:"M d, Y" }}</span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary">Renew</button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">No subscriptions expiring soon</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="stat-card">
+            <h5 class="mb-4"><i class="bi bi-lightning me-2"></i>Quick Actions</h5>
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <a href="{% url 'school_register' %}" class="btn btn-primary w-100 py-3">
+                        <i class="bi bi-plus-circle fs-4 d-block mb-2"></i>
+                        Register New School
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="#" class="btn btn-outline-secondary w-100 py-3">
+                        <i class="bi bi-file-earmark-spreadsheet fs-4 d-block mb-2"></i>
+                        Export Data
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="#" class="btn btn-outline-secondary w-100 py-3">
+                        <i class="bi bi-map fs-4 d-block mb-2"></i>
+                        View Map
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="#" class="btn btn-outline-secondary w-100 py-3">
+                        <i class="bi bi-gear fs-4 d-block mb-2"></i>
+                        Platform Settings
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Monthly Registrations Chart
+const ctx = document.getElementById('registrationsChart').getContext('2d');
+const chartData = {
+    labels: [{% for month in monthly_registrations.keys %}'{{ month }}',{% endfor %}],
+    datasets: [{
+        label: 'Schools Registered',
+        data: [{% for count in monthly_registrations.values %}{{ count }},{% endfor %}],
+        borderColor: '#1e3a8a',
+        backgroundColor: 'rgba(30, 58, 138, 0.1)',
+        tension: 0.4,
+        fill: true
+    }]
+};
+
+new Chart(ctx, {
+    type: 'line',
+    data: chartData,
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

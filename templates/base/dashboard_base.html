@@ -1,0 +1,256 @@
+{% extends 'base/base.html' %}
+
+{% block title %}{{ page_title }} - KriptoSchool{% endblock %}
+
+{% block content %}
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+        <div class="sidebar-brand-icon">
+            <i class="fas fa-graduation-cap"></i>
+        </div>
+        <div>
+            <h5 class="mb-0">KriptoSchool</h5>
+            <small class="opacity-75">{{ user_role|title }}{% if school %} - {{ school.name|truncatechars:15 }}{% endif %}</small>
+        </div>
+    </div>
+    
+    <nav class="sidebar-menu">
+        <!-- Common Dashboard Link -->
+        {% if user_role == 'superadmin' %}
+            <a href="{% url 'superadmin_dashboard' %}" class="sidebar-menu-item active">
+                <i class="bi bi-speedometer2"></i>
+                <span>Dashboard</span>
+            </a>
+            
+            <a href="#" class="sidebar-menu-item">
+                <i class="bi bi-building"></i>
+                <span>Schools</span>
+            </a>
+            
+            <a href="{% url 'school_register' %}" class="sidebar-menu-item">
+                <i class="bi bi-plus-circle"></i>
+                <span>Register School</span>
+            </a>
+            
+            <a href="#" class="sidebar-menu-item">
+                <i class="bi bi-graph-up"></i>
+                <span>Analytics</span>
+            </a>
+            
+            <a href="#" class="sidebar-menu-item">
+                <i class="bi bi-map"></i>
+                <span>School Map</span>
+            </a>
+            
+        {% elif user_role == 'schooladmin' %}
+            <a href="{% url 'schooladmin_dashboard' %}" class="sidebar-menu-item active">
+                <i class="bi bi-speedometer2"></i>
+                <span>Dashboard</span>
+            </a>
+            
+            <a href="#" class="sidebar-menu-item">
+                <i class="bi bi-person-badge"></i>
+                <span>Teachers</span>
+            </a>
+            
+            <a href="#" class="sidebar-menu-item">
+                <i class="bi bi-people"></i>
+                <span>Students</span>
+            </a>
+            
+            <a href="#" class="sidebar-menu-item">
+                <i class="bi bi-collection"></i>
+                <span>Classes</span>
+            </a>
+            
+            <a href="#" class="sidebar-menu-item">
+                <i class="bi bi-megaphone"></i>
+                <span>Announcements</span>
+            </a>
+            
+            <a href="#" class="sidebar-menu-item">
+                <i class="bi bi-gear"></i>
+                <span>School Settings</span>
+            </a>
+            
+        {% elif user_role == 'teacher' %}
+            <a href="{% url 'teacher_dashboard' %}" class="sidebar-menu-item active">
+                <i class="bi bi-speedometer2"></i>
+                <span>Dashboard</span>
+            </a>
+            
+            <a href="#" class="sidebar-menu-item">
+                <i class="bi bi-collection"></i>
+                <span>My Classes</span>
+            </a>
+            
+            <a href="#" class="sidebar-menu-item">
+                <i class="bi bi-clipboard-check"></i>
+                <span>Assignments</span>
+            </a>
+            
+            <a href="#" class="sidebar-menu-item">
+                <i class="bi bi-file-earmark-arrow-up"></i>
+                <span>Notes</span>
+            </a>
+            
+            <a href="#" class="sidebar-menu-item">
+                <i class="bi bi-graph-up"></i>
+                <span>Gradebook</span>
+            </a>
+            
+            <a href="#" class="sidebar-menu-item">
+                <i class="bi bi-people"></i>
+                <span>Students</span>
+            </a>
+            
+        {% elif user_role == 'student' %}
+            <a href="{% url 'student_dashboard' %}" class="sidebar-menu-item active">
+                <i class="bi bi-speedometer2"></i>
+                <span>Dashboard</span>
+            </a>
+            
+            <a href="#" class="sidebar-menu-item">
+                <i class="bi bi-megaphone"></i>
+                <span>Announcements</span>
+            </a>
+            
+            <a href="#" class="sidebar-menu-item">
+                <i class="bi bi-clipboard-check"></i>
+                <span>Assignments</span>
+            </a>
+            
+            <a href="#" class="sidebar-menu-item">
+                <i class="bi bi-book"></i>
+                <span>Study Materials</span>
+            </a>
+            
+            <a href="#" class="sidebar-menu-item">
+                <i class="bi bi-graph-up"></i>
+                <span>My Results</span>
+            </a>
+            
+            <a href="#" class="sidebar-menu-item">
+                <i class="bi bi-calendar-event"></i>
+                <span>School Calendar</span>
+            </a>
+        {% endif %}
+        
+        <hr class="mx-3 my-2 opacity-25">
+        
+        <a href="{% url 'profile' %}" class="sidebar-menu-item">
+            <i class="bi bi-person"></i>
+            <span>Profile</span>
+        </a>
+        
+        <a href="#" class="sidebar-menu-item">
+            <i class="bi bi-gear"></i>
+            <span>Settings</span>
+        </a>
+        
+        <hr class="mx-3 my-2 opacity-25">
+        
+        <a href="{% url 'logout' %}" class="sidebar-menu-item">
+            <i class="bi bi-box-arrow-left"></i>
+            <span>Logout</span>
+        </a>
+    </nav>
+</aside>
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Top Navbar -->
+    <nav class="top-navbar">
+        <div class="d-flex align-items-center gap-3">
+            <button class="btn btn-link text-decoration-none d-md-none" id="sidebarToggle">
+                <i class="bi bi-list fs-4 text-secondary"></i>
+            </button>
+            <h4 class="mb-0 text-secondary">{{ page_title }}</h4>
+        </div>
+        
+        <div class="user-menu">
+            <!-- Notifications -->
+            <div class="dropdown me-2">
+                <button class="btn btn-link text-decoration-none position-relative" type="button" data-bs-toggle="dropdown">
+                    <i class="bi bi-bell fs-5 text-secondary"></i>
+                    {% if unread_announcements|default:0 > 0 %}
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
+                            {{ unread_announcements }}
+                        </span>
+                    {% endif %}
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><h6 class="dropdown-header">Notifications</h6></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item small" href="#"><i class="bi bi-megaphone me-2"></i>No new notifications</a></li>
+                </ul>
+            </div>
+            
+            <!-- User Profile Dropdown -->
+            <div class="dropdown">
+                <button class="btn btn-link text-decoration-none dropdown-toggle d-flex align-items-center gap-2" 
+                        type="button" data-bs-toggle="dropdown">
+                    {% if user_role == 'superadmin' and user.superadmin_profile.profile_picture %}
+                        <img src="{{ user.superadmin_profile.profile_picture.url }}" alt="Avatar" class="user-avatar">
+                    {% elif user_role == 'schooladmin' and user.schooladmin_profile.profile_picture %}
+                        <img src="{{ user.schooladmin_profile.profile_picture.url }}" alt="Avatar" class="user-avatar">
+                    {% elif user_role == 'teacher' and user.teacher_profile.profile_picture %}
+                        <img src="{{ user.teacher_profile.profile_picture.url }}" alt="Avatar" class="user-avatar">
+                    {% elif user_role == 'student' and user.student_profile.profile_picture %}
+                        <img src="{{ user.student_profile.profile_picture.url }}" alt="Avatar" class="user-avatar">
+                    {% else %}
+                        <div class="user-avatar bg-primary text-white d-flex align-items-center justify-content-center">
+                            {{ user.username|first|upper }}
+                        </div>
+                    {% endif %}
+                    <span class="d-none d-md-inline">{{ user.get_full_name|default:user.username }}</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="bi bi-person me-2"></i>Profile</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Content Area -->
+    <div class="content-area">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        {% block dashboard_content %}{% endblock %}
+    </div>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <p class="mb-0">Powered by <strong>Kripto Software</strong> &copy; 2024. All rights reserved.</p>
+    </footer>
+</div>
+
+<script>
+    // Sidebar toggle for mobile
+    document.getElementById('sidebarToggle')?.addEventListener('click', function() {
+        document.getElementById('sidebar').classList.toggle('show');
+    });
+    
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', function(event) {
+        const sidebar = document.getElementById('sidebar');
+        const toggle = document.getElementById('sidebarToggle');
+        if (window.innerWidth < 768 && sidebar && !sidebar.contains(event.target) && !toggle.contains(event.target)) {
+            sidebar.classList.remove('show');
+        }
+    });
+</script>
+
+{% block extra_js %}{% endblock %}
+{% endblock %}
