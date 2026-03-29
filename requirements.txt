@@ -1,0 +1,64 @@
+# KriptoSchool - Multi-Tenant School Management System
+# Requirements File
+# Django & Core
+Django==4.2.9
+Pillow==10.1.0  # Image processing for profile pictures, logos, etc.
+
+# Database (SQLite3 is default, no additional package needed)
+# psycopg2-binary==2.9.9  # Uncomment if switching to PostgreSQL later
+
+# Utilities
+python-dateutil==2.8.2  # Date manipulation for terms, sessions, subscriptions
+pytz==2023.3  # Timezone support for Nigerian timezone
+
+# File Handling
+python-magic==0.4.27  # File type validation for uploads
+olefile==0.47  # For DOC/DOCX file validation
+
+# Charts & Data Visualization (for dashboards)
+# Note: Charts will be rendered client-side with Chart.js via CDN
+# No Python package needed for server-side chart generation
+
+# PDF Generation (for result slips, reports)
+reportlab==4.0.7  # Generate PDF report cards, transcripts
+
+# Excel Export (for bulk operations, reports)
+openpyxl==3.1.2  # Excel export for student lists, grade sheets
+xlrd==2.0.1  # Excel import for bulk student/teacher registration
+
+# Email
+# Django has built-in email support, but for advanced features:
+django-templated-mail==1.1.1  # Template-based emails
+
+# Security & Authentication
+django-brake==1.6.0  # Rate limiting for login attempts (optional)
+# django-two-factor-auth==1.15.0  # Uncomment if 2FA is needed later
+
+# Rich Text Editor Support
+# Using simple textarea with JS enrichment, no heavy WYSIWYG backend needed
+# If CKEditor or TinyMCE backend integration is needed:
+# django-ckeditor==6.7.0
+# django-tinymce==3.6.1
+
+# Mapping (Leaflet.js used on frontend, no backend package needed)
+# Google Maps would require:
+# googlemaps==4.10.0  # Uncomment if using Google Maps API backend
+
+# Monitoring & Logging (optional for production)
+# django-debug-toolbar==4.2.0  # Development debugging
+# sentry-sdk==1.38.0  # Error tracking in production
+
+# Deployment (for production, not needed for SQLite3 development)
+# gunicorn==21.2.0  # WSGI server
+# whitenoise==6.6.0  # Static file serving
+# django-storages==1.14.2  # If using S3 for file storage later
+
+# Development Tools (optional)
+# black==23.11.0  # Code formatting
+# flake8==6.1.0  # Code linting
+# pytest==7.4.3  # Testing
+# pytest-django==4.7.0  # Django testing support
+
+# Additional Utilities
+unicode-slugify==0.1.5  # For generating clean URLs/slugs
+django-filter==23.5  # Advanced filtering for tables/lists

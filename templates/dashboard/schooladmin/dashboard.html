@@ -1,0 +1,224 @@
+{% extends 'base/dashboard_base.html' %}
+
+{% block dashboard_content %}
+<!-- Stats Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-card-icon primary">
+                <i class="bi bi-people"></i>
+            </div>
+            <div class="stat-card-value">{{ total_students }}</div>
+            <div class="stat-card-label">Total Students</div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-card-icon success">
+                <i class="bi bi-chalkboard-teacher"></i>
+            </div>
+            <div class="stat-card-value">{{ total_teachers }}</div>
+            <div class="stat-card-label">Total Teachers</div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-card-icon warning">
+                <i class="bi bi-collection"></i>
+            </div>
+            <div class="stat-card-value">{{ total_classes }}</div>
+            <div class="stat-card-label">Total Classes</div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-card-icon primary">
+                <i class="bi bi-megaphone"></i>
+            </div>
+            <div class="stat-card-value">{{ recent_announcements.count }}</div>
+            <div class="stat-card-label">Announcements</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Quick Actions -->
+    <div class="col-lg-8">
+        <div class="stat-card">
+            <h5 class="mb-4"><i class="bi bi-lightning me-2"></i>Quick Actions</h5>
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <a href="#" class="btn btn-outline-primary w-100 py-3">
+                        <i class="bi bi-person-plus fs-4 d-block mb-2"></i>
+                        Add Teacher
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="#" class="btn btn-outline-success w-100 py-3">
+                        <i class="bi bi-person-badge fs-4 d-block mb-2"></i>
+                        Register Student
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="#" class="btn btn-outline-info w-100 py-3">
+                        <i class="bi bi-megaphone fs-4 d-block mb-2"></i>
+                        Create Announcement
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="#" class="btn btn-outline-secondary w-100 py-3">
+                        <i class="bi bi-calendar-event fs-4 d-block mb-2"></i>
+                        Upload Timetable
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Students -->
+    <div class="col-lg-4">
+        <div class="stat-card h-100">
+            <h5 class="mb-4"><i class="bi bi-clock-history me-2"></i>Recent Students</h5>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Class</th>
+                            <th>Parent</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in recent_students %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    {% if student.profile_picture %}
+                                        <img src="{{ student.profile_picture.url }}" alt="" class="rounded-circle" width="30" height="30">
+                                    {% else %}
+                                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 30px; height: 30px;">
+                                            {{ student.user.first_name|default:student.user.username|first|upper }}
+                                        </div>
+                                    {% endif %}
+                                    <span>{{ student.user.get_full_name|default:student.user.username }}</span>
+                                </div>
+                            </td>
+                            <td><small>{{ student.class_enrolled.name }}</small></td>
+                            <td><small class="text-muted">{{ student.parent_phone }}</small></td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center text-muted py-4">No recent students</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mt-2">
+    <!-- Teachers Overview -->
+    <div class="col-lg-6">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="mb-0"><i class="bi bi-chalkboard-teacher me-2"></i>Teachers</h5>
+                <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Employee ID</th>
+                            <th>Subjects</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for teacher in teachers %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    {% if teacher.profile_picture %}
+                                        <img src="{{ teacher.profile_picture.url }}" alt="" class="rounded-circle" width="30" height="30">
+                                    {% else %}
+                                        <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center" style="width: 30px; height: 30px;">
+                                            {{ teacher.user.first_name|default:teacher.user.username|first|upper }}
+                                        </div>
+                                    {% endif %}
+                                    <span>{{ teacher.user.get_full_name|default:teacher.user.username }}</span>
+                                </div>
+                            </td>
+                            <td><small>{{ teacher.employee_id }}</small></td>
+                            <td><small>{{ teacher.subjects.count }} subjects</small></td>
+                            <td>
+                                {% if teacher.is_active %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Inactive</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">No teachers yet</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Classes Overview -->
+    <div class="col-lg-6">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="mb-0"><i class="bi bi-collection me-2"></i>Classes</h5>
+                <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Class Name</th>
+                            <th>Section</th>
+                            <th>Students</th>
+                            <th>Capacity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for class_obj in classes %}
+                        <tr>
+                            <td><strong>{{ class_obj.name }}</strong></td>
+                            <td>{{ class_obj.section|default:"-" }}</td>
+                            <td>
+                                <div class="progress" style="height: 6px; width: 100px;">
+                                    <div class="progress-bar" role="progressbar" 
+                                         style="width: {{ class_obj.student_count|floatformat:0 }}%" 
+                                         aria-valuenow="{{ class_obj.student_count }}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="{{ class_obj.capacity }}">
+                                    </div>
+                                </div>
+                                <small>{{ class_obj.student_count }}/{{ class_obj.capacity }}</small>
+                            </td>
+                            <td>{{ class_obj.capacity }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">No classes yet</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
